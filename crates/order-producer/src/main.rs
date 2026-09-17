@@ -72,3 +72,37 @@ async fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_random_order_has_fields() {
+        let order = random_order();
+
+        assert!(order.order_id.starts_with("ord_"));
+        assert!(order.user_id.starts_with("user_"));
+        assert_eq!(order.items.len(), 2);
+
+        assert!(order.total_price >= 500 && order.total_price < 20500);
+    }
+
+    #[test]
+    fn test_order_serializes_to_json() {
+        let order = random_order();
+        let json = serde_json::to_string(&order).expect("Failed to serialize order");
+
+        // Basic sanity checks on JSON structure
+        assert!(json.contains("\"order_id\""));
+        assert!(json.contains("\"user_id\""));
+        assert!(json.contains("\"items\""));
+        assert!(json.contains("\"total_price\""));
+
+        // Ensure we can deserialize it back
+        let parsed: serde_json::Value = serde_json::from_str(&json).expect("Failed to parse JSON");
+
+        assert!(parsed.get("order_id").is_some());
+        assert!(parsed.get("total_price").is_some());
+    }
+}

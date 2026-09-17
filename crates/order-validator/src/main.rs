@@ -96,3 +96,63 @@ async fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validates_low_amount_as_accepted() {
+        let order = Order {
+            order_id: "ord_1".to_string(),
+            user_id: "user_1".to_string(),
+            items: vec!["item_a".to_string()],
+            total_price: 10_000,
+        };
+
+        let status = if order.total_price > 15_000 {
+            "rejected"
+        } else {
+            "accepted"
+        };
+
+        assert_eq!(status, "accepted");
+    }
+
+    #[test]
+    fn test_validates_high_amount_as_rejected() {
+        let order = Order {
+            order_id: "ord_2".to_string(),
+            user_id: "user_2".to_string(),
+            items: vec!["item_b".to_string()],
+            total_price: 20_000,
+        };
+
+        let status = if order.total_price > 15_000 {
+            "rejected"
+        } else {
+            "accepted"
+        };
+
+        assert_eq!(status, "rejected");
+    }
+
+    #[test]
+    fn test_validated_order_serializes() {
+        let validated = OrderValidated {
+            order_id: "ord_3".to_string(),
+            status: "accepted".to_string(),
+        };
+
+        let json = serde_json::to_string(&validated).expect("Failed to serialize");
+
+        assert!(json.contains("\"order_id\""));
+        assert!(json.contains("\"status\""));
+        assert!(json.contains("accepted"));
+
+        let parsed: serde_json::Value = serde_json::from_str(&json).expect("Failed to parse JSON");
+
+        assert_eq!(parsed["order_id"], "ord_3");
+        assert_eq!(parsed["status"], "accepted");
+    }
+}

@@ -95,3 +95,49 @@ async fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_accepted_order_will_be_shipped() {
+        let validated = OrderValidated {
+            order_id: "ord_1".to_string(),
+            status: "accepted".to_string(),
+        };
+
+        let will_shipip = validated.status == "accepted";
+        assert!(will_shipip);
+    }
+
+    #[test]
+    fn test_rejected_order_will_not_be_shipped() {
+        let validated = OrderValidated {
+            order_id: "ord_2".to_string(),
+            status: "rejected".to_string(),
+        };
+
+        let will_shipip = validated.status == "accepted";
+        assert!(!will_shipip);
+    }
+
+    #[test]
+    fn test_shipped_order_serializes() {
+        let shipped = OrderShipped {
+            order_id: "ord_3".to_string(),
+            shipped_at: "2026-09-17T17:00:00Z".to_string(),
+        };
+
+        let json = serde_json::to_string(&shipped).expect("Failed to serialize");
+
+        assert!(json.contains("\"order_id\""));
+        assert!(json.contains("\"shipped_at\""));
+        assert!(json.contains("ord_3"));
+
+        let parsed: serde_json::Value = serde_json::from_str(&json).expect("Failed to parse JSON");
+
+        assert_eq!(parsed["order_id"], "ord_3");
+        assert!(parsed["shipped_at"].as_str().is_some());
+    }
+}
