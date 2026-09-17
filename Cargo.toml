@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/order-producer",
+  "crates/order-validator",
+  "crates/order-shipping",
+  "crates/order-metrics",
+]
+
+[workspace.dependencies]
